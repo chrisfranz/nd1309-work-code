@@ -10,9 +10,16 @@ const be = require('blockexplorer');
  * Start by requesting the hash then request the block and use console.log()
  * 
  */
-function getBlock(index) {
-  	//add your code here
-  	
+async function getBlock(index) {
+  //add your code here
+  try {
+    const hash = await be.blockIndex(index);
+    const hashAux = JSON.parse(hash).blockHash 
+    const block = await be.block(hashAux);
+    console.log(block);
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 /**

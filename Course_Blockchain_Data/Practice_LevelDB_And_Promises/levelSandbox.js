@@ -7,52 +7,58 @@ const level = require('level');
 const chainDB = './chaindata';
 // Declaring a class
 class LevelSandbox {
-	// Declaring the class constructor
-    constructor() {
-    	this.db = level(chainDB);
-    }
-  
-  	// Get data from levelDB with key (Promise)
-  	getLevelDBData(key){
-        let self = this; // because we are returning a promise we will need this to be able to reference 'this' inside the Promise constructor
-        return new Promise(function(resolve, reject) {
-            self.db.get(key, (err, value) => {
-                if(err){
-                    if (err.type == 'NotFoundError') {
-                        resolve(undefined);
-                    }else {
-                        console.log('Block ' + key + ' get failed', err);
-                        reject(err);
-                    }
-                }else {
-                    resolve(value);
-                }
-            });
-        });
-    }
-  
-  	// Add data to levelDB with key and value (Promise)
-    addLevelDBData(key, value) {
-        let self = this;
-        return new Promise(function(resolve, reject) {
-            self.db.put(key, value, function(err) {
-                if (err) {
-                    console.log('Block ' + key + ' submission failed', err);
-                    reject(err);
-                }
-                resolve(value);
-            });
-        });
-    }
-  
-  	/**
-     * Step 2. Implement the getBlocksCount() method
-     */
-    getBlocksCount() {
-        let self = this;
-        // Add your code here
-        
+  // Declaring the class constructor
+  constructor() {
+    this.db = level(chainDB);
+  }
+
+  // Get data from levelDB with key (Promise)
+  getLevelDBData(key){
+    let self = this; // because we are returning a promise we will need this to be able to reference 'this' inside the Promise constructor
+    return new Promise(function(resolve, reject) {
+    self.db.get(key, (err, value) => {
+    if (err) {
+      if (err.type == 'NotFoundError') {
+        resolve(undefined);
+      } else {
+        console.log('Block ' + key + ' get failed', err);
+        reject(err);
       }
+    } else {
+      resolve(value);
+    }
+    });
+    });
+  }
+
+  // Add data to levelDB with key and value (Promise)
+  addLevelDBData(key, value) {
+    let self = this;
+    return new Promise(function(resolve, reject) {
+      self.db.put(key, value, function(err) {
+      if (err) {
+        console.log('Block ' + key + ' submission failed', err);
+        reject(err);
+      }
+        resolve(value);
+      });
+    });
+  }
+
+  /**
+  * Step 2. Implement the getBlocksCount() method
+  */
+  getBlocksCount() {
+    let self = this;
+    // Add your code here
+    return new Promise((resolve, reject) => {
+      let count = 0;
+      self.db.createReadStream()
+        .on('data', data => count++)
+        .on('error', err => reject(err))
+        .on('close', resolve(count))
+    })
+  }
 }
 
 // Export the class

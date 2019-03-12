@@ -1,0 +1,16 @@
+/* 
+
+createrawtransaction '[{"txid"; "TXID", "vout": VOUT}]''{"TO ADDRESS":AMOUNT, "FROM ADDRESS":AMOUNT}'
+
+createrawtransaction '[{"txid": "c28ab75bf80fcaeaf5fcb080d0263d03077ad0ae1583c101a38521821e15dd43", "vout":0}]'{"2N2uQwoFqvYgRaWdGEXG3ibdayWu2KjKbYR":0.011, "2NBgrTzfcWYAeKVBtfyVKtE4fJ3eK2Yr9Pp",0.02}'
+
+
+
+createrawtransaction '[{"txid": "c28ab75bf80fcaeaf5fcb080d0263d03077ad0ae1583c101a38521821e15dd43", "vout":0}]' '{"2N2uQwoFqvYgRaWdGEXG3ibdayWu2KjKbYR":0.011, "2NBgrTzfcWYAeKVBtfyVKtE4fJ3eK2Yr9Pp":0.02}'
+createrawtransaction '[{"txid": "c28ab75bf80fcaeaf5fcb080d0263d03077ad0ae1583c101a38521821e15dd43", "vout":0}]' '{"2NBgrTzfcWYAeKVBtfyVKtE4fJ3eK2Yr9Pp":0.0085, "2N2uQwoFqvYgRaWdGEXG3ibdayWu2KjKbYR":0.011}'
+
+
+020000000143dd151e822185a301c18315aed07a07033d26d080b0fcf5eaca0ff85bb78ac20000000000ffffffff02e0c810000000000017a91469f215cd6984717d9d055a19b2f1beb3894618918780841e000000000017a914ca4b1cff21f7ef822d5c53e9d413f7191fbc1d978700000000
+
+FROM: c28ab75bf80fcaeaf5fcb080d0263d03077ad0ae1583c101a38521821e15dd43
+*/

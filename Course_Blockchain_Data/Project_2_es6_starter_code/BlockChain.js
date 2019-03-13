@@ -14,13 +14,17 @@ class Blockchain {
   }
 
   // Helper method to create a Genesis Block (always with height= 0)
-  // You have to options, because the method will always execute when you create your blockchain
+  // You have two options, because the method will always execute when you create your blockchain
   // you will need to set this up statically or instead you can verify if the height !== 0 then you
   // will not create the genesis block
-  generateGenesisBlock() {
+  async generateGenesisBlock() {
     // Add your code here
-    const genBlock = new Block.Block('this is the genesis block');
-    this.addBlock(genBlock);
+    const blockCount = await this.getBlockHeight();
+
+    if (blockCount === -1) {
+      const genBlock = new Block.Block('this is the genesis block');
+      this.addBlock(genBlock);
+    }
   }
 
   // Get block height, it is a helper method that return the height of the blockchain
@@ -33,16 +37,16 @@ class Blockchain {
   async addBlock (newBlock) {
     // Add your code here
     // get number of blocks in store
-    const blockHeight = await this.getBlockHeight();
+    const blockCount = await this.getBlockHeight();
+    // get previous block hash, assign to newBlock
+    if (blockCount > -1) {
+      newBlock.height = blockCount + 1;
+      let prevBlock = await this.getBlock(blockCount);
+      let prevHash = prevBlock.hash;
+      newBlock.previousBlockHash = prevHash
+    }    
     // assign new block time
     newBlock.time = new Date().getTime().toString().slice(0, -3);
-    // get previous block hash, assign to newBlock
-    if (blockHeight > 0) {
-      newBlock.height = blockHeight;
-      let prevBlock = await this.getBlock(blockHeight - 1);
-      let prevHash = prevBlock.hash;
-      newBlock.previousHashBlock = prevHash
-    }
     // hash newBlock
     newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
     // save newBlock
@@ -59,14 +63,19 @@ class Blockchain {
   // Validate if Block is being tampered by Block Height
   async validateBlock(height) {
     // Add your code here
-    const blockObj = await this.getBlock(height);
-    const blockObjCopy = {...blockObj};
-    blockObjCopy.hash = '';
-    const newHash = SHA256(JSON.stringify(blockObjCopy)).toString();
-    const existingHash = blockObj.hash;
+    // get block associated with height
+    const block = await this.getBlock(height);
+    // make copy of block to re-hash
+    const blockCopy = {...block};
+    // initialize hash
+    blockCopy.hash = '';
+    // calculate hash
+    const newHash = SHA256(JSON.stringify(blockCopy)).toString();
+    // pull hash from existing block
+    const { hash } = block;
     
     return new Promise((resolve, reject) => {
-      if (newHash === existingHash) {
+      if (hash === newHash) {
         resolve(true)
       } else {
         reject(false);
@@ -77,19 +86,30 @@ class Blockchain {
   // Validate Blockchain
   async validateChain() {
     // Add your code here
-    const promises = [];
-    const blockHeight = await this.getBlockHeight();
-
-    for (let i = 0; i < blockHeight; i++) {
-      const validateResult = await this.validateBlock(i);
-      promises.push(validateResult);
-    }
-    const results = await Promise.all(promises);
-
-    const result = results.every(el => el);
+      const promises = [];
+      const blockHeight = await this.getBlockHeight();
+      let link = true;
+      // iterate through chain, validating each block
+      for (let i = 0; i < blockHeight; i++) {
+        const validateResult = await this.validateBlock(i);
+        // push result of validation to promises array
+        promises.push(validateResult);
+        // check that hash of currentBlock is equal to previousBlockHash of next block
+        if (i < blockHeight - 1) {
+          const block = await this.getBlock(i);
+          const hash = block.hash;
+          const nextBlock = await this.getBlock(i + 1);
+          const nextHash = nextBlock.previousBlockHash;
+          if (hash !== nextHash) {
+            link = false;
+          }
+        }
+      } 
+    // convert results array into single boolean value
+    const result = promises.every(el => el);
 
     return new Promise((resolve, reject) => {
-      if (result) {
+      if (result && link) {
         resolve(true);
       } else {
         reject(false);
